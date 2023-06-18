@@ -2,6 +2,8 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import BottomTabs from './BottomTab';
 import { Login, SignUp } from '../Screens';
+import Workout from '../Screens/Workout';
+import WOscreen from '../Screens/WOscreen';
 
 const Stack = createStackNavigator();
 
@@ -13,8 +15,11 @@ export default function StackNavigator() {
             }}
         >
             <Stack.Screen name="SignUp" component={SignUp} />
+            <Stack.Screen name='Workout' component={Workout} />
             <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="WOscreen" component={WOscreen} />
             <Stack.Screen name="BottomTab" component={BottomTabs} />
+            
         </Stack.Navigator>
     );
 }

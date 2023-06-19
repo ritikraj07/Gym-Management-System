@@ -5,7 +5,7 @@ import getData from '../Component/Getter';
 import setData from '../Component/Setter';
 export default function Attendence({ navigation }) {
     const [users, setusers] = useState([])
-
+    const [curDate, setCurDate] = useState([])
     let date = (Date().split(' ').map((day, i) => i < 4 ? day + ' ' : '')).join('')
     useEffect(() => {
         getData('data').then((res) => {
@@ -14,6 +14,12 @@ export default function Attendence({ navigation }) {
                 .then(result => {
                     setusers(result.data)
                     console.log(result.data.attendence)
+                    let dt = []
+                    result.data.map((ele) => {
+                        dt.push(ele.attendence[ele.attendence.length-1])
+                    })
+                    console.log(" from line 21 ====>", dt)
+                    setCurDate(dt)
                 })
                 .catch(error => console.log('error', error));
         })
@@ -22,13 +28,15 @@ export default function Attendence({ navigation }) {
 
     useEffect(() => {
         
-    },[users])
+    },[users, curDate])
     
-    function MakeAttendence(i, val) {
+    function MakeAttendence(i) {
         let user = users[i]
-        GetAttendance(user._id)
-        console.log(user.attendence)
-        
+        let ndt = curDate[i]
+        console.log("New user from 29 ", user)
+        ndt = { ...ndt, present: !ndt.present }
+        let newD = curDate;
+        setCurDate(newD);
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
         myHeaders.append("Authorization", "Bearer BQBc9efPu6om_2COvIP4ZmmHedQb2IwtSEM3z4mw0W4Mh19CkKJdpymhjkb2Z6dGctbliTn8ivGsmb3XwuRJ1ijV1wwPhEwsJ3zpJDMtfVA8UJZk8PY");
@@ -37,8 +45,10 @@ export default function Attendence({ navigation }) {
         let data = {
             "_id": users[i]._id,
             "date": date,
-            "value": true
+            "value": !present_val
         }
+
+
         
         var raw = JSON.stringify(data);
 
@@ -48,15 +58,23 @@ export default function Attendence({ navigation }) {
             body: raw,
             redirect: 'follow'
         };
+        user = {
+            ...user, attendence: [...user.attendence.filter((d) => {
+                if (d.date == date) {
+                return {...d, present: present_val}
+            }else{
+                    return d;
+            }
+        })] }
+        let array = users;
+        array[i] = user
+        console.log("New user from 52 ",user)
+        setusers(array)
 
         fetch("https://nice-erin-rattlesnake-yoke.cyclic.app/user/attend", requestOptions)
             .then(response => response.json())
             .then(result => {
-                user = { ...user, attendence: [...attendence, data] }
-                let array = users;
-                array[i] = user
-                console.log(user)
-                setusers(array)
+                
                 console.log("======> ",result.data)
             })
             .catch(error => console.log('error===>', error));
@@ -104,11 +122,12 @@ export default function Attendence({ navigation }) {
             fontWeight:600
         }} >Attendence</Text>
         <ScrollView style={{marginBottom:100, width:'100%'}} >
-            {users.map((user, i) => {
-                console.log("from map ==>", user.attendence[user.attendence.length-1]?.present, '\n')
+            {curDate.map((user, i) => {
+               
                 return <TouchableOpacity key={i}
                     onPress={() => {
                         console.log(i)
+
                     }}
                     style={{
                         flexDirection: "row",
@@ -128,11 +147,11 @@ export default function Attendence({ navigation }) {
                     <Text style={styles.text}>{i + 1}  {user.name}</Text>
                     <TouchableOpacity
                         onPress={() => {
-                            MakeAttendence(i, !user?.attendence[user?.attendence.length - 1]?.present)
+                            MakeAttendence(i)
                         }}
-                        style={[styles.btm, user?.attendence[user.attendence.length - 1]?.present ==true ? { backgroundColor: '#00b300' } : { backgroundColor: '#ff4d94' }]}
+                        style={[styles.btm, user.present ? { backgroundColor: '#00b300' } : { backgroundColor: '#ff4d94' }]}
                     >
-                        <Text style={styles.text}> {user?.attendence[user.attendence.length - 1]?.present ==true?"Present":"Absent"} </Text>
+                        <Text style={styles.text}> {user.present ==true?"Present":"Absent"} </Text>
                     </TouchableOpacity>
                 </TouchableOpacity>
             })}

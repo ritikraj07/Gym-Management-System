@@ -16,7 +16,10 @@ export default function AddUser() {
         password: '',
         payment_mode: '',
         amount: '',
-        attendence:[]
+        attendence: [{
+            date: (Date().split(' ').map((day, i) => i < 4 ? day + ' ' : '')).join(''),
+            present: false
+        }]
     })
 
     const [admin, setadmin] = useState()

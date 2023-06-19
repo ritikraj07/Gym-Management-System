@@ -1,42 +1,42 @@
 import {useState, useEffect} from 'react'
 import { View, Text,TouchableOpacity,StyleSheet, ScrollView } from 'react-native';
-import DailyExercise from '../Component/DailyExercise';
+
 import getData from '../Component/Getter';
-import setData from '../Component/Setter';
 export default function Attendence({ navigation }) {
     const [users, setusers] = useState([])
     const [curDate, setCurDate] = useState([])
     let date = (Date().split(' ').map((day, i) => i < 4 ? day + ' ' : '')).join('')
     useEffect(() => {
-        getData('data').then((res) => {
-            fetch("https://nice-erin-rattlesnake-yoke.cyclic.app/user/all/" + res._id)
-                .then(response => response.json())
-                .then(result => {
-                    setusers(result.data)
-                    console.log(result.data.attendence)
-                    let dt = []
-                    result.data.map((ele) => {
-                        dt.push(ele.attendence[ele.attendence.length-1])
+        const unsubscribe = navigation.addListener('focus', () => {
+            getData('data').then((res) => {
+                fetch("https://nice-erin-rattlesnake-yoke.cyclic.app/user/all/" + res._id)
+                    .then(response => response.json())
+                    .then(result => {
+                        setusers(result.data)
+                        // console.log(result.data.attendence)
+                        let dt = []
+                        result.data.map((ele) => {
+                            dt.push(ele.attendence[ele.attendence.length - 1])
+                        })
+                        console.log(" from line 21 ====>", dt)
+                        setCurDate(dt)
                     })
-                    console.log(" from line 21 ====>", dt)
-                    setCurDate(dt)
-                })
-                .catch(error => console.log('error', error));
-        })
+                    .catch(error => console.log('error', error));
+            })
+        });
+
+        return unsubscribe;
+       
 
     }, [navigation])
 
     useEffect(() => {
         
-    },[users, curDate])
+    }, [users, curDate])
+    
+    
     
     function MakeAttendence(i) {
-        let user = users[i]
-        let ndt = curDate[i]
-        console.log("New user from 29 ", user)
-        ndt = { ...ndt, present: !ndt.present }
-        let newD = curDate;
-        setCurDate(newD);
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
         myHeaders.append("Authorization", "Bearer BQBc9efPu6om_2COvIP4ZmmHedQb2IwtSEM3z4mw0W4Mh19CkKJdpymhjkb2Z6dGctbliTn8ivGsmb3XwuRJ1ijV1wwPhEwsJ3zpJDMtfVA8UJZk8PY");
@@ -47,9 +47,6 @@ export default function Attendence({ navigation }) {
             "date": date,
             "value": !present_val
         }
-
-
-        
         var raw = JSON.stringify(data);
 
         var requestOptions = {
@@ -58,58 +55,18 @@ export default function Attendence({ navigation }) {
             body: raw,
             redirect: 'follow'
         };
-        user = {
-            ...user, attendence: [...user.attendence.filter((d) => {
-                if (d.date == date) {
-                return {...d, present: present_val}
-            }else{
-                    return d;
-            }
-        })] }
-        let array = users;
-        array[i] = user
-        console.log("New user from 52 ",user)
-        setusers(array)
+      
 
         fetch("https://nice-erin-rattlesnake-yoke.cyclic.app/user/attend", requestOptions)
             .then(response => response.json())
             .then(result => {
-                
-                console.log("======> ",result.data)
+                navigation.navigate('UserDetail', users[i])
+                // console.log("======> ",result.data)
             })
             .catch(error => console.log('error===>', error));
     }
 
   
-    function GetAttendance(id) {
-        var myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        myHeaders.append("Authorization", "Bearer BQBc9efPu6om_2COvIP4ZmmHedQb2IwtSEM3z4mw0W4Mh19CkKJdpymhjkb2Z6dGctbliTn8ivGsmb3XwuRJ1ijV1wwPhEwsJ3zpJDMtfVA8UJZk8PY");
-
-        var raw = JSON.stringify({
-            "_id": id,
-            "date": date
-        });
-
-
-        var requestOptions = {
-            method: 'POST',
-            headers: myHeaders,
-            body: raw,
-            redirect: 'follow'
-        };
-
-        fetch("https://nice-erin-rattlesnake-yoke.cyclic.app/user/getAttendance", requestOptions)
-            .then(response => response.json())
-            .then(result => {
-                console.log(result)
-                let val = result.data.present
-                console.log("get ==>", result)
-
-            })
-            .catch(error => console.log('error', error));
-    }
-
     
     return (<View style={{
         height: '100%', backgroundColor: 'white', alignItems: 'center',
@@ -127,6 +84,7 @@ export default function Attendence({ navigation }) {
                 return <TouchableOpacity key={i}
                     onPress={() => {
                         console.log(i)
+                        navigation.navigate('UserDetail', users[i])
 
                     }}
                     style={{
@@ -144,10 +102,11 @@ export default function Attendence({ navigation }) {
                         borderRadius: 15
                     }}
                 >
-                    <Text style={styles.text}>{i + 1}  {user.name}</Text>
+                    <Text style={styles.text}>{i + 1}  {users[i].name}</Text>
                     <TouchableOpacity
                         onPress={() => {
                             MakeAttendence(i)
+                            navigation.navigate('UserDetail', users[i])
                         }}
                         style={[styles.btm, user.present ? { backgroundColor: '#00b300' } : { backgroundColor: '#ff4d94' }]}
                     >

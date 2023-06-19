@@ -1,45 +1,30 @@
 import { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import AntDesign from "react-native-vector-icons/AntDesign";
-
+import { NavigationEvents } from 'react-navigation';
 import DailyExercise from '../Component/DailyExercise';
 import getData from '../Component/Getter';
 import setData from '../Component/Setter';
+import LoadingComponent from '../Component/Loading';
 export default function Dashboard({ navigation }) {
-    const [user, setuser] = useState([{ amount: 0 }])
+    const [user, setuser] = useState([])
    
-    const [exercise, setExercise] = useState([
-        "Push-ups",
-        "Sit-ups",
-        "Squats",
-        "Lunges",
-        "Burpees",
-        "Plank",
-        "Mountain climbers",
-        "Jumping jacks",
-        "Bicep curls",
-        "Tricep dips",
-        "Shoulder press",
-        "Deadlifts",
-        "Russian twists",
-        "Calf raises",
-        "Leg press",
-        "Bench press",
-        "Crunches",
-        "Leg extensions",
-        "Lat pulldowns",
-        "Dumbbell rows"
-    ])
-
+  
     useEffect(() => {
-        getData('data').then((res) => {
-            fetch("https://nice-erin-rattlesnake-yoke.cyclic.app/user/all/"+res._id)
-                .then(response => response.json())
-                .then(result => {
-                    setuser(result.data)
-                })
-                .catch(error => console.log('error', error));
-        })
+        const unsubscribe = navigation.addListener('focus', () => {
+            
+            getData('data').then((res) => {
+                fetch("https://nice-erin-rattlesnake-yoke.cyclic.app/user/all/" + res._id)
+                    .then(response => response.json())
+                    .then(result => {
+                        setuser(result.data)
+                    })
+                    .catch(error => console.log('error', error));
+            })
+        });
+
+        return unsubscribe;
+       
     
     }, [navigation])
 
@@ -70,7 +55,8 @@ export default function Dashboard({ navigation }) {
 
     }
 
-    return (<View style={{ backgroundColor: "white", padding: 10, height: '100%' }} >
+    return (<View style={{ backgroundColor: "white", padding: 10, height: '100%', paddingHorizontal:20 }} >
+        
         <View style={{
             flexDirection: 'row', justifyContent: 'space-between',
             alignItems: 'center',
@@ -81,58 +67,25 @@ export default function Dashboard({ navigation }) {
 
             }} name="logout" size={30} style={{ color: 'black', fontWeight: 600, marginRight: 2 }} />
         </View>
-        <View>
-            <FlatList
-                data={exercise}
-                renderItem={({ item, index }) => <DailyExercise index={index} item={item} />}
-                horizontal
-            />
-        </View>
-        <TouchableOpacity style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            height: 80,
-            marginHorizontal: 20,
-            backgroundColor: '#0000cc',
-            padding: 15,
-            borderRadius: 15
-
-        }} >
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 600 }}>Active User</Text>
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 600 }}>{user.length>0?user.length:0}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            height: 80,
-            margin: 20,
-            backgroundColor: '#0000cc',
-            padding: 15,
-            borderRadius: 15
-
-        }}
+        
+        <TouchableOpacity style={styles.btm}
+            onPress={() => {
+                navigation.navigate('AllUser', user)
+            }}
         >
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 600 }} >Monthly Revenue</Text>
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 600 }} >$ {user.length > 0 ? user.reduce((totle, ele) => {
+            <Text style={styles.text}>Active User</Text>
+            <Text style={styles.text}>{user.length>0?user.length:0}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.btm}>
+            <Text style={styles.text} >Monthly Revenue</Text>
+            <Text style={styles.text} >$ {user.length > 0 ? user.reduce((totle, ele) => {
                 return totle + ele.amount
             },0): 0}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            height: 80,
-            marginHorizontal: 20,
-            backgroundColor: '#0000cc',
-            padding: 15,
-            borderRadius: 15
-
-        }}
+        <TouchableOpacity style={styles.btm}
         >
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 600 }} >Plan Expired User</Text>
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 600 }} >{ExpiredUserPlan()}</Text>
+            <Text style={styles.text} >Plan Expired User</Text>
+            <Text style={styles.text} >{ExpiredUserPlan()}</Text>
         </TouchableOpacity>
     </View>)
 }
@@ -142,5 +95,19 @@ export default function Dashboard({ navigation }) {
 
 
 
+const styles = StyleSheet.create({
+    text: { color: 'white', fontSize: 20, fontWeight: 600 },
+    btm: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        height: 80,
+        backgroundColor: '#0000cc',
+        padding: 15,
+        borderRadius: 15,
+        marginVertical:5
+
+    }
+})
 
 

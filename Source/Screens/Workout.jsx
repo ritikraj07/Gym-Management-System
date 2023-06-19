@@ -58,7 +58,7 @@ export default function Workout({ navigation }) {
             "date": date,
             "value": true
         });
-        console.log("Here is raw 62", raw)
+
         var requestOptions = {
             method: 'POST',
             headers: myHeaders,
@@ -75,7 +75,15 @@ export default function Workout({ navigation }) {
             })
             .catch(error => console.log('error', error));
     }
+    function LogOut() {
+        getData('data').then((res) => {
+            res = { ...res, login: false }
+            setData('data', res)
+            navigation.navigate('SignUp')
+        })
 
+
+    }
     return <ImageBackground source={{ uri: 'https://images.pexels.com/photos/3289711/pexels-photo-3289711.jpeg?cs=srgb&dl=pexels-cesar-gale%C3%A3o-3289711.jpg&fm=jpg' }}
         style={{
             height: "100%",
@@ -83,6 +91,9 @@ export default function Workout({ navigation }) {
             justifyContent: 'center'
         }}
     >
+        <TouchableOpacity onPress={()=>{LogOut()}} style={[styles.btm, {position:'absolute', top:10, right:10}]} >
+            <Text style={styles.btmLable} >LogOut</Text>
+        </TouchableOpacity>
         <View style={{
             backgroundColor: 'white', width: '90%',
             borderRadius: 10,
@@ -122,10 +133,12 @@ const styles = StyleSheet.create({
         height: 50,
         borderRadius: 5,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        paddingHorizontal:20
     },
     btmLable: {
         color: 'white',
-        fontSize: 25
+        fontSize: 25,
+        
     }
 });

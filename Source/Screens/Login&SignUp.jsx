@@ -3,31 +3,33 @@ import { useState, useEffect } from 'react'
 import setData from "../Component/Setter";
 import getData from "../Component/Getter";
 import clearStorage from "../Component/ClearStorage";
+import LoadingComponent from "../Component/Loading";
 export default function SignUp({ navigation }) {
     const [text, setText] = useState({ email: '', password: '' })
     const [error, setError] = useState('')
-
+    const [loading, setloading] = useState(false)
     useEffect(() => {
         getData('data')
             .then((res) => {
-                    
                 if (res && res.login == true) {
-
                     navigation.navigate(res.screen)
-
                 }
             })
     }, [error])
 
-    let len = text.password.length > 6 && text.email.length > 11
+    let len = (text.password.length > 6 && text.email.length > 11)
 
     function InputTaker(value, fieldName) {
         setText({ ...text, [fieldName]: value });
         setError('')
     }
+    function ResetInput() {
+        setText({ email: '', password: '' })
+    }
 
 
     function AdminSignUp() {
+        setloading(true)
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
         var raw = JSON.stringify({
@@ -44,8 +46,11 @@ export default function SignUp({ navigation }) {
             .then(res => res.json())
             .then((res) => {
                 // console.log(res)
+
+                setloading(false)
+                ResetInput()
                 if (res.status) {
-                    clearStorage().then(res => { })
+                    clearStorage()
                     setData("data", { ...res.data, screen: 'BottomTab',login:true })
                     navigation.navigate('BottomTab')
                 } else {
@@ -59,6 +64,7 @@ export default function SignUp({ navigation }) {
     }
 
     function Login(url, screenName) {
+        setloading(true)
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
         myHeaders.append("Authorization", "Bearer BQBc9efPu6om_2COvIP4ZmmHedQb2IwtSEM3z4mw0W4Mh19CkKJdpymhjkb2Z6dGctbliTn8ivGsmb3XwuRJ1ijV1wwPhEwsJ3zpJDMtfVA8UJZk8PY");
@@ -78,11 +84,10 @@ export default function SignUp({ navigation }) {
         fetch(url, requestOptions)
             .then(response => response.json())
             .then(res => {
-                // console.log(res)
+                ResetInput()
+                setloading(false)
                 if (res.status) {
                     clearStorage().then(res=>{})
-
-                    console.log(res.data)
                     setData('data', { ...res.data, screen: screenName, login: true })
                     navigation.navigate(screenName)
                 } else {
@@ -90,6 +95,7 @@ export default function SignUp({ navigation }) {
                 }
             })
             .catch(error => console.log('error', error));
+        
     }
 
 
@@ -103,13 +109,14 @@ export default function SignUp({ navigation }) {
             justifyContent: 'center'
         }}
     >
+        {loading?<LoadingComponent />:
 
         <View style={{
             backgroundColor: 'white', width: '90%',
             borderRadius: 10,
             padding: 10
         }} >
-            {/* Error message text */}
+            
             {error.length > 0 && <Text style={{ textAlign: 'center', fontSize: 18, color: 'red' }} >
                 {error}
             </Text>}
@@ -148,6 +155,7 @@ export default function SignUp({ navigation }) {
                 <Text style={styles.btmLable}>User Login</Text>
             </TouchableOpacity>
         </View>
+}
 
 
 

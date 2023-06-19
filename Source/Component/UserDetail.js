@@ -30,10 +30,7 @@ export default function UserDetail({route}) {
             backgroundColor: '#b3ffcc', borderRadius: 2,
             borderWidth: 2, borderColor: '#005ce6'
         }} >
-                <View style={styles.view}>
-                    <Text style={styles.text}>User id:</Text>
-                    <Text style={styles.text}>{user._id}</Text>
-                </View>
+                
                 
                 <View style={styles.view}>
                     <Text style={styles.text}>User Name:</Text>
@@ -76,6 +73,10 @@ export default function UserDetail({route}) {
             <View style={styles.view}>
                 <Text style={styles.text}>User Contact:</Text>
                 <Text style={styles.text}>{user.number}</Text>
+            </View>
+            <View style={styles.view}>
+                <Text style={styles.text}>User Password:</Text>
+                <Text style={styles.text}>{user.password}</Text>
             </View>
 
         </ScrollView>
